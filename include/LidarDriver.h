@@ -61,6 +61,7 @@ namespace lidar_driver {
 
 			// overloading operatori
 			void operator=(LidarDriver &&);
+			LidarDriver& operator=(LidarDriver&);
 
 			// classi per lancio di errori
 			class NoGheSonVettoriError{}; // Eccezione "NoGheSonVettori" ("NoCiSonoVettori")
