@@ -228,6 +228,18 @@ namespace lidar_driver {
 		secia.swap(ld.secia);
 	}
 
+	// A = B
+	LidarDriver& LidarDriver::operator=(LidarDriver& ld) {
+		// controllo che l'oggetto assegnato non sia se stesso
+	    if (this != &ld) {
+	        elPiNovo = ld.elPiNovo;
+	        elPiVecio = ld.elPiVecio;
+	        dimension = ld.dimension;
+	        resolusion = ld.resolusion;
+	        secia = ld.secia;
+	    }
+	    return *this;
+	}
 	/* Ridefinizione dell'operatore <<
         Autore: G. Bordignon
         Con un try - catch viene gestito il caso in cui il buffer sia vuoto: la funzione get_last lancia infatti l'eccezione "NoGheSonVettori", che, recepita dalla presente
