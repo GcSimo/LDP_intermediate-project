@@ -1,5 +1,5 @@
 /*
-	FILE HEADER LIDARDRIVER.H
+	FILE IMPLEMENTAZIONI LIDARDRIVER.CPP
 	Autore:		Giovanni Bordignon
 				Giacomo Simonetto
 				Andrea Visonà
