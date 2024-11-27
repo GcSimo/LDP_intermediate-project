@@ -1,42 +1,62 @@
 /*
 	FILE HEADER LIDARDRIVER.H
-	Versione:	4.0
-	Data:		24/11/2024
-	Autore:		Giovanni Bordignon - Giacomo Simonetto
+	Autore:		Giovanni Bordignon
 
-	Osservazioni (1.0 - G. Bordignon):
-		1. Dichiarazioni costanti statiche (BUFFER_DIM).
-		2. Dichiarazione primo indice (coa), in valutazione nome del secondo indice.
-		3. Dichiarazione dei costruttori di default e copia.
-		4. Dichiarazioni di alcune funzioni membro.
+	La classe si compone di un buffer dove vengono salvate le scansioni dello strumento e di alcune
+	funzioni per maneggiare i dati memorizzati.
 
-	Osservazioni (3.0 - G. Bordignon)
-		1. Modifiche varie, alla luce anche delle osservazioni della v. 1.0.
-		2. Valutato cambio nomi agli indici.
+	Note sulla implementazione del buffer:
+	 - il buffer è implementato come vettore (o coda) circolare di dimensione costate di BUFFER_DIM
+	   con indice del primo elemento, indice dell'ultimo elemento e una variabile che tiene traccia
+	   della dimensione occupata
+	 - secia     -> vettore del tipo std::vector<std::vector<double>>
+	 - elPiNovo  -> indice dell'ultimo vettore inserito
+	 - elPiVecio -> indice dell'elemento nel vettore da più tempo
+	 - dimension -> dimensione occupata nel buffer
 
-	Osservazioni (4.0 -  G. Simonetto)
-		1. aggiunta del namespace
-		2. aggiunti qualche commenti nella classe
-		3. correzione impaginazione (usiamo le tab e non i 4 spazi)
-		4. implementazione costruttori e distruttori
-		5. modifica variabili e costanti per maggiore flessibilità sulla risoluzione angolare:
-			- aggiunta resolusion
-			- aggiunta costante MIN_ANGLE
-			- aggiunta costante MAX_ANGLE
-			- aggiunta costante MIN_RESOLUTION
-			- aggiunta costante MAX_RESOLUTION
-			- sostituzione costante DIM_LETTURE con dimScansioni
-			- correzione dichiarazione di secia -> è puntatore a vettore di puntatori a vettori di double
+	Costanti private della classe:
+	- int BUFFER_DIM = 10         -> dimensione massima del buffer
+	- int MIN_ANGLE = 0           -> angolo minimo da cui parte la scansione
+	- int MAX_ANGLE = 180         -> angolo massimo in cui termina la scansione
+	- double MIN_RESOLUTION = 0.1 -> risoluzione minima accettata
+	- double MAX_RESOLUTION = 1   -> risoluzione massima accettata
+
+	Variabili rpivate della classe:
+	- std::vector<std::vector<double>> secia ->
+	- int elPiNovo      -> indice dell'ultimo vettore inserito
+	- int elPiVecio     -> indice dell'elemento nel vettore da più tempo
+	- int dimension     -> dimensione occupata nel buffer
+	- int dimScansioni  -> dimensione dei vettori delle scansioni
+	- double resolusion -> risoluzione angolare dello strumento
+
+	Nota sui costruttori-operatori di copia e di move:
+	1. non serve implementare il costruttore e l'operatore di copia perché è sufficiente la shallow copy
+	   membro a membro: non abbiamo puntatori da gestire e il vettore secia applica la copia membro a membro
+	   sugli elementi che contiene come definita dalla classe std::vector
+	2. serve, invece, il costruttore di move e l'operatore di move per risparmiare dati e tempo: meglio non
+	   copiare i vettori delle scansioni se si può evitare facendo una move
 	
-	Osservazioni (5.0 - G. Simonetto)
-		1. correzione sull'implementazione in memoria del buffer
-		2. aggiunta funzione get_last per implementazione dell'overloading operator<<
+	Costruttori:
+	- LidarDriver(double)         -> costruttore che riceve come parametro la risoluzione dello strumento
+	- LidarDriver(LidarDriver &&) -> costruttore di move
+	
+	Funzioni membro:
+	- void new_scan(std::vector<double>)   -> inserisce nel buffer la scansione passata come parametro
+	- std::vector<double> get_scan()       -> restituisce e rimuove dal buffer la scansione più vecchia
+	- std::vector<double> get_last() const -> restituisce senza rimuovere l'ultima scansione inserita
+	- void clear_buffer()                  -> svuota il buffer da tutte le scansioni
+	- double get_distance(double) const    -> restituisce la misura effettuata nell'ultima scansione per
+	                                          uno specifico angolo passato come parametro
 
-	Osservazioni (6.0 - G. Simonetto)
-		1. non serve il costruttore e l'operatore di copia perché è sufficiente la shallow copy membro a membro
-		   siccome non abbiamo puntatori da gestire, il vettore secia applica la copia membro a membro sugli
-		   elementi che contiene e, non contenendo puntatori, è tutto ok
-		2. serve, invece, il costruttore di move e l'operatore di move per risparmiare dati e tempo
+	Overloading operatori
+	void operator=(LidarDriver &&)                                -> overloading operatore di move
+	std::ostream &operator<<(std::ostream &, const LidarDriver &) -> overloading operatore per output stream
+
+	Classi per lancio di eccezioni
+	- class NoGheSonVettoriError{}        -> classe lanciata in caso si tenta di leggere/accedere/rimuovere
+	                                         delle scansioni quando il buffer è vuoto
+	- class ResolusionForaDaiRangeError{} -> classe lanciata se la risoluzione passata al costruttore non è valida
+	- class AngoloForaDaiRangeError{}     -> classe lanciata se l'angolo passato a get_distance non è valido
 */
 
 #ifndef LIDARDRIVER_H
@@ -64,7 +84,6 @@ namespace lidar_driver {
 
 			// classi per lancio di errori
 			class NoGheSonVettoriError{}; // Eccezione "NoGheSonVettori" ("NoCiSonoVettori")
-			class NullVettorError{};
 			class ResolusionForaDaiRangeError{};
 			class AngoloForaDaiRangeError{};
 
