@@ -30,9 +30,9 @@
 	- double resolusion -> risoluzione angolare dello strumento
 
 	Nota sui costruttori-operatori di copia e di move:
-	1. non serve implementare il costruttore e l'operatore di copia perché è sufficiente la shallow copy
-	   membro a membro: non abbiamo puntatori da gestire e il vettore secia applica la copia membro a membro
-	   sugli elementi che contiene come definita dalla classe std::vector
+	1. apparentemente non servirebbe implementare il costruttore e l'operatore di assegnamento di copia,
+	   siccome basterebbe una shallow copy -> non abbiamo puntatori da gestire e il vettore secia applica
+	   la copia membro a membro sugli elementi che contiene come definita dalla classe std::vector
 	2. serve, invece, il costruttore di move e l'operatore di move per risparmiare dati e tempo: meglio
 	   non copiare i vettori delle scansioni se si può evitare facendo una move
 	3. siccome non si può implementare solo quello di move e non quello di copy, ci tocca farli entrambi,
@@ -93,9 +93,6 @@ namespace lidar_driver {
 			class NoGheSonVettoriError{}; // Eccezione "NoGheSonVettori" ("NoCiSonoVettori")
 			class ResolusionForaDaiRangeError{};
 			class AngoloForaDaiRangeError{};
-
-			// fx debug
-			void db(std::string);
 
 		private:
 			// costanti private

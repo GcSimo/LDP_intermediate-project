@@ -1,5 +1,5 @@
 /*
-	FILE TESTER MAIN.H
+	FILE TESTER MAIN.CPP
 	Autore:		Andrea Visonà
 
 	Vengono testate le funzioni della classe LidarDriver
@@ -130,26 +130,26 @@ int main() {
 	}
 	// ora verifico che i vettori di inserimento e rimozione siano uguali
 	if(v1 == v2)
-		cout<<"distanza angoli con approssimazione corretta"<<endl;
+		cout<<"distanza angoli con approssimazione -> corretta"<<endl;
 	else
-		cout<<"distanza angoli con approssimazione sbagliata"<<endl;
+		cout<<"distanza angoli con approssimazione -> sbagliata"<<endl;
 	
 	// verifico anche il caso in cui gli angoli siano fuori dalla portata o buffer vuoto
 	try {
 		ld1.get_distance(-1);
 	} catch (LidarDriver::AngoloForaDaiRangeError) {
-		cout << "eccezione lanciata correttamente pt1" << endl;
+		cout << "<<errore voluto - eccezione lanciata correttamente per angoli troppo piccoli>>" << endl;
 	}
 	try {
 		ld1.get_distance(182);
 	} catch (LidarDriver::AngoloForaDaiRangeError) {
-		cout << "eccezione lanciata correttamente pt2" << endl;
+		cout << "<<errore voluto - eccezione lanciata correttamente per angoli troppo grandi>>" << endl;
 	}
 	try {
 		ld1.clear_buffer();
 		ld1.get_distance(50);
 	} catch (LidarDriver::NoGheSonVettoriError) {
-		cout << "eccezione lanciata correttamente pt3" << endl;
+		cout << "<<errore voluto - eccezione lanciata correttamente se si vuole leggere una misura in un buffer vuoto>>" << endl;
 	}
 
 	return 0;

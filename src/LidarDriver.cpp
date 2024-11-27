@@ -10,7 +10,7 @@
 #include "../include/LidarDriver.h"
 #include <vector>  // per operazioni su vector
 #include <cmath>   // per std::round nella funzione get_distance
-#include <iostream> // per overloading operator<<
+#include <ostream> // per overloading operator<<
 #include <string>  // per overloading operator<<
 
 namespace lidar_driver {
@@ -46,7 +46,6 @@ namespace lidar_driver {
 		   dal compilatore, ma siccome serve creare il costruttore di move, bisogna fare anche questo
 	*/
 	LidarDriver::LidarDriver(const LidarDriver &ld) {
-		std::cout << "copy costr" << std::endl;
 		// inizializzazione variabili con i valori dell'oggetto da smembrare
 		elPiNovo = ld.elPiNovo;
 		elPiVecio = ld.elPiVecio;
@@ -68,7 +67,6 @@ namespace lidar_driver {
 		   avrà i dati dell'argomento della funzione e l'argomento avrà i vecchi dati di secia
 	*/
 	LidarDriver::LidarDriver(LidarDriver &&ld) {
-		std::cout << "move costr" << std::endl;
 		// inizializzazione variabili con i valori dell'oggetto da smembrare
 		elPiNovo = ld.elPiNovo;
 		elPiVecio = ld.elPiVecio;
