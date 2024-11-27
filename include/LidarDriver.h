@@ -33,12 +33,16 @@
 	1. non serve implementare il costruttore e l'operatore di copia perché è sufficiente la shallow copy
 	   membro a membro: non abbiamo puntatori da gestire e il vettore secia applica la copia membro a membro
 	   sugli elementi che contiene come definita dalla classe std::vector
-	2. serve, invece, il costruttore di move e l'operatore di move per risparmiare dati e tempo: meglio non
-	   copiare i vettori delle scansioni se si può evitare facendo una move
+	2. serve, invece, il costruttore di move e l'operatore di move per risparmiare dati e tempo: meglio
+	   non copiare i vettori delle scansioni se si può evitare facendo una move
+	3. siccome non si può implementare solo quello di move e non quello di copy, ci tocca farli entrambi,
+	   infatti il compilatore, come riconosce il costruttore di move, disabilita quello di copia e quando
+	   si fanno assegnamenti tra lvalues segna errore
 	
 	Costruttori:
-	- LidarDriver(double)         -> costruttore che riceve come parametro la risoluzione dello strumento
-	- LidarDriver(LidarDriver &&) -> costruttore di move
+	- LidarDriver(double)              -> costruttore che riceve come parametro la risoluzione dello strumento
+	- LidarDriver(const LidarDriver &) -> costruttore di copia
+	- LidarDriver(LidarDriver &&)      -> costruttore di move
 	
 	Funzioni membro:
 	- void new_scan(std::vector<double>)   -> inserisce nel buffer la scansione passata come parametro
@@ -49,6 +53,7 @@
 	                                          uno specifico angolo passato come parametro
 
 	Overloading operatori
+	LidarDriver& operator=(const LidarDriver &)                   -> overloading operatore di copia
 	void operator=(LidarDriver &&)                                -> overloading operatore di move
 	std::ostream &operator<<(std::ostream &, const LidarDriver &) -> overloading operatore per output stream
 
@@ -70,6 +75,7 @@ namespace lidar_driver {
 		public:
 			// costruttori e distruttori
 			LidarDriver(double);
+			LidarDriver(const LidarDriver &);
 			LidarDriver(LidarDriver &&);
 
 			// member function
@@ -81,12 +87,15 @@ namespace lidar_driver {
 
 			// overloading operatori
 			void operator=(LidarDriver &&);
-			LidarDriver& operator=(LidarDriver&);
+			LidarDriver &operator=(const LidarDriver &);
 
 			// classi per lancio di errori
 			class NoGheSonVettoriError{}; // Eccezione "NoGheSonVettori" ("NoCiSonoVettori")
 			class ResolusionForaDaiRangeError{};
 			class AngoloForaDaiRangeError{};
+
+			// fx debug
+			void db(std::string);
 
 		private:
 			// costanti private

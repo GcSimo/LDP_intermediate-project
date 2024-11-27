@@ -1,14 +1,16 @@
 /*
 	FILE HEADER LIDARDRIVER.H
-	Autore:		Giacomo Simonetto
+	Autore:		Giovanni Bordignon
+				Giacomo Simonetto
+				Andrea Visonà
 
-	Vengono implementati i metodi della libreria LidarDriver.h
+	Vengono implementate le funzioni della libreria LidarDriver.h
 */
 
 #include "../include/LidarDriver.h"
 #include <vector>  // per operazioni su vector
 #include <cmath>   // per std::round nella funzione get_distance
-#include <ostream> // per overloading operator<<
+#include <iostream> // per overloading operator<<
 #include <string>  // per overloading operator<<
 
 namespace lidar_driver {
@@ -16,6 +18,10 @@ namespace lidar_driver {
 		1. riceve come parametro la risoluzione dello strumento e verifica che sia valida
 		2. imposta le variabili membro ai valori di default
 		3. ridimensiona il buffer alla dimensione necessaria
+
+		Osservazione:
+		- con la formula usata per calcolare il numero delle misure per scansione, non si supera mai
+		  il 180, ci si ferma sempre al massimo numero <= 180°
 	*/
 	LidarDriver::LidarDriver(double resolusion) {
 		// verifica che la risoluzione sia valida
@@ -31,26 +37,50 @@ namespace lidar_driver {
 		secia.resize(BUFFER_DIM);
 	}
 
-	/* Costruttore di move:
-		1. riceve come parametro un oggetto da "smembrare"
-		2. copia le variabili da copiare e sposta i riferimenti da spostare
+	/* Costruttore di copia:
+		1. riceve come parametro un oggetto da copiare
+		2. copia le variabili da copiare
 
 		Osservazioni:
-		1. la funzione di swap scambia i riferimenti dei dati memorizzati nei due vettori, per cui secia
-		   avrà i dati dell'argomento della funzione e l'argomento avrà i vecchi dati di secia (ovvero nulla)
-		2. si suppone che l'rvalue non verrà più utilizzato perché la sua secia (vettore buffer) ha dimensione
-		   nulla e non BUFFER_DIM come dovrebbe essere, ovvero il suo stato non è valido. Però il problema non
-		   si pone, siccome un rvalue non si utilizza più di una volta
+		1. basterebbe semplicemente una shallow copy del costruttore di copia generato in automatico
+		   dal compilatore, ma siccome serve creare il costruttore di move, bisogna fare anche questo
 	*/
-	LidarDriver::LidarDriver(LidarDriver &&ld) {
+	LidarDriver::LidarDriver(const LidarDriver &ld) {
+		std::cout << "copy costr" << std::endl;
 		// inizializzazione variabili con i valori dell'oggetto da smembrare
 		elPiNovo = ld.elPiNovo;
 		elPiVecio = ld.elPiVecio;
 		dimension = ld.dimension;
 		resolusion = ld.resolusion;
+		dimScansioni = ld.dimScansioni;
+
+		// la classe std::vector gestisce in automatico la copia membro a mebro dei suoi elementi
+		secia = ld.secia;
+	}
+
+	/* Costruttore di move:
+		1. riceve come parametro un oggetto da "smembrare"
+		2. copia le variabili da copiare e sposta i riferimenti da spostare
+		3. svuoto l'oggetto smembrato, invocando clear_buffer
+
+		Osservazioni:
+		1. la funzione di swap scambia i riferimenti dei dati memorizzati nei due vettori, per cui secia
+		   avrà i dati dell'argomento della funzione e l'argomento avrà i vecchi dati di secia
+	*/
+	LidarDriver::LidarDriver(LidarDriver &&ld) {
+		std::cout << "move costr" << std::endl;
+		// inizializzazione variabili con i valori dell'oggetto da smembrare
+		elPiNovo = ld.elPiNovo;
+		elPiVecio = ld.elPiVecio;
+		dimension = ld.dimension;
+		resolusion = ld.resolusion;
+		dimScansioni = ld.dimScansioni;
 
 		// la funzione swap scambia i riferimenti dei dati tra i due vettori
 		secia.swap(ld.secia);
+
+		// svuoto l'oggetto smembrato
+		ld.clear_buffer();
 	}
 
 	/* Funzione new_scan(vector<double> v):
@@ -129,39 +159,33 @@ namespace lidar_driver {
 	}
 
 	/* Funzione get_last():
-        - La funzione restituisce l'ultimo vettore inserito, in caso il buffer sia vuoto viene
+		- La funzione restituisce l'ultimo vettore inserito, in caso il buffer sia vuoto viene
 		  lanciata l'eccezione "NoGheSonVettoriError".
 
 		- La funzione non è richiesta dalle specifiche, ma viene usata nella helper function
 		  dell'overloading dell'operatore <<
-    */
-    std::vector<double> LidarDriver::get_last() const {
-        if (dimension == 0)
-            throw NoGheSonVettoriError();
-        
-        return secia[elPiNovo];
-    }
+	*/
+	std::vector<double> LidarDriver::get_last() const {
+		if (dimension == 0)
+			throw NoGheSonVettoriError();
+		
+		return secia[elPiNovo];
+	}
 
 	/* Funzione clear_buffer():
-		1. se il buffer è vuoto, non faccio nulla, perché no xe poe svotàr na secia già vota
-		2. reimposta gli indici di posizione e la dimensione
-		3. svuota tutti i vettori così si occupa meno memoria
+		1. reimposta gli indici di posizione e la dimensione
+		2. rialloco il vettore del buffer
+
+		Osservazione:
+		- non effettuo controlli se il buffer è vuoto, perché anche se dimension = 0, non è detto
+		  che tutti i vettori 
 	 */
 	void LidarDriver::clear_buffer() {
-		// Se il buffer è vuoto non c'è da fare nulla
-		if (dimension == 0)
-			return;
-		
 		// Reimposta le variabili dell'oggetto
 		elPiNovo = elPiVecio = dimension = 0;
 
-		// Svuota tutti i vettori -> effettuo una swap con vettore vuoto
-		for (int i = 0; i < BUFFER_DIM; i++)
-			std::vector<double>().swap(secia[i]);
-
-		// VERSIONE 2: per evitare il ciclo for finale, faccio direttamente la reallocazione dell'intera secia
-		// e correggo eventuali strani casi in cui il vettore cambia dimensione (es. costruttore move)
-		// std::vector<std::vector<double>>(BUFFER_DIM).swap(secia);
+		// rialloco il vettore del buffer come nel costruttore
+		std::vector<std::vector<double>>(BUFFER_DIM).swap(secia);
 	}
 
 	/* Funzione get_distance(double):
@@ -209,6 +233,22 @@ namespace lidar_driver {
 		return secia[elPiNovo][index];
 	}
 
+	/* Overloading assegnamento di copia:
+		1. riceve come parametro un oggetto da copiare
+		2. copia le variabili da copiare
+	*/
+	LidarDriver& LidarDriver::operator=(const LidarDriver& ld) {
+		// controllo che l'oggetto assegnato non sia se stesso
+		if (this != &ld) {
+			elPiNovo = ld.elPiNovo;
+			elPiVecio = ld.elPiVecio;
+			dimension = ld.dimension;
+			resolusion = ld.resolusion;
+			secia = ld.secia;
+		}
+		return *this;
+	}
+
 	/* Overloading assegnamento con move:
 		1. riceve come parametro un oggetto da "smembrare"
 		2. copia le variabili da copiare e sposta i riferimenti da spostare
@@ -227,34 +267,21 @@ namespace lidar_driver {
 
 		// la funzione swap scambia i riferimenti dei dati tra i due vettori
 		secia.swap(ld.secia);
-    
-    // svuoto l'oggetto smembrato
+
+		// svuoto l'oggetto smembrato
 		ld.clear_buffer();
 	}
-
-  // A = B
-	LidarDriver& LidarDriver::operator=(LidarDriver& ld) {
-		// controllo che l'oggetto assegnato non sia se stesso
-	    if (this != &ld) {
-	        elPiNovo = ld.elPiNovo;
-	        elPiVecio = ld.elPiVecio;
-	        dimension = ld.dimension;
-	        resolusion = ld.resolusion;
-	        secia = ld.secia;
-	    }
-	    return *this;
-	}
   
-	/* Ridefinizione dell'operatore <<
-        Con un try - catch viene gestito il caso in cui il buffer sia vuoto:
+	/* Overloading dell'operatore <<
+		Con un try - catch viene gestito il caso in cui il buffer sia vuoto:
 		- la funzione get_last lancia infatti l'eccezione "NoGheSonVettori", che, recepita dalla presente
-          funzione, permette di inviare immediatamente allo stream di output una generica stampa di un array
+		  funzione, permette di inviare immediatamente allo stream di output una generica stampa di un array
 		  vuoto
 		- nel caso l'eccezione non si presenti, sintomo che il buffer non è vuoto, l'ultimo vettore inserito
 		  viene restituito dalla funzione get_last() e stampato con un'opportuna formattazione.
-    */
-    std::ostream &operator<<(std::ostream& os, const LidarDriver& ld) {
-        try {
+	*/
+	std::ostream &operator<<(std::ostream& os, const LidarDriver& ld) {
+		try {
 			std::vector<double> temp = ld.get_last(); // <- qui si potrebbe lanciare l'eccezione
 			std::string s = "{ ";
 			for (int i = 0; i < temp.size(); i++) {
@@ -265,9 +292,9 @@ namespace lidar_driver {
 			s += " }\n";
 
 			return os << s;
-        }
-        catch (LidarDriver::NoGheSonVettoriError) {
-            return os << "{ }\n";
-        }
-    }
+		}
+		catch (LidarDriver::NoGheSonVettoriError) {
+			return os << "{ }\n";
+		}
+	}
 }
