@@ -1,14 +1,6 @@
 # LDP-intermediate-project
 Progetto intermedio del corso di Laboratorio di Programmazione
 
-## TO-DO List
-1. nella funzione get_scan si può restituire il vettore scansione senza farne la copia, usando la funzione move
-2. nella funzione clear_buffer:
-   1. renderla eseguibile anche nel caso in cui dimension sia 0, ma ci possono ancora essere dati memorizzati nel vettore e gli indici non è detto che siano entrambi sul primo elemento del vettore
-   2. verificare se ha senso usare la versione2 al posto del ciclo for
-3. sistemare costruttori di copy
-4. rivedere funzione new_scan per bug
-
 ## Descrizione Classe LidarDriver
 La classe memorizza un certo numero di scansioni, effettuate da un Lidar, in un buffer. Le scansioni sono ottenute dalla misurazione della distanza per vari angoli consecutivi da 0° a 180°. La risoluzione angolare, ovvero la distanza tra due misurazioni consecutive, dipende dal tipo di Lidar ed è compresa tra 0.1° e 1°.
 

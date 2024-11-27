@@ -59,11 +59,11 @@ int main() {
 	vector<double> x = LD.get_last();
 	cout<<" primo valore dell'ultimo vettore : "<<x[0]<<" e ultimo valore dell'ultimo vettore : "<<x[x.size()-1]<<endl;
 	
-	cout<<" ora controllo il vettore più vecchio e lo scarto con il metodo get_scan() e successivamente la richiamo"<<endl;
+	cout<<" ora controllo il vettore piu vecchio e lo scarto con il metodo get_scan() e successivamente la richiamo"<<endl;
 	// per assicurarmi di aver tolto il vettore
 	vector<double> y = LD.get_last();
 	cout<<" primo valore dell'ultimo vettore : "<<y[0]<<" e ultimo valore dell'ultimo vettore : "<<y[y.size()-1]<<endl;
-	cout<<" la richiamo e noterò che si tratta del vettore aggiunto subito dopo quello appena eliminato"<<endl;
+	cout<<" la richiamo e notero' che si tratta del vettore aggiunto subito dopo quello appena eliminato"<<endl;
 	vector<double> z = LD.get_scan();
 	cout<<" primo valore dell'ultimo vettore : "<<z[0]<<" e ultimo valore dell'ultimo vettore : "<<z[z.size()-1]<<endl<<endl;
 	
