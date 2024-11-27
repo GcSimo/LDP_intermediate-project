@@ -115,9 +115,9 @@ int main() {
 
 	// ora verifico che i vettori di inserimento e rimozione siano uguali
 	if(v1 == v2)
-		cout<<"distanza angoli esatti corretta"<<endl;
+		cout<<"distanza angoli esatti -> corretta"<<endl;
 	else
-		cout<<"distanza angoli esatti sbagliata"<<endl;
+		cout<<"distanza angoli esatti -> sbagliata"<<endl;
 
 	// ora testo la funzione per angoli in cui si va incontro ad una approssimazione
 	// vado a pescare i valori per ogni angolo da 0 a 180 con un certo errore e li salvo nel secondo vettore
