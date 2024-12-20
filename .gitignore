@@ -35,3 +35,6 @@ main
 # cartelle
 build
 test
+
+# zip files
+*.zip
